@@ -19,6 +19,7 @@
 #include "tab_account.h"
 #include "tab_supervisor.h"
 #include "userlist.h"
+#include "cardcompleter.h"
 
 #include <QApplication>
 #include <QCompleter>
@@ -58,7 +59,8 @@ TabRoom::TabRoom(TabSupervisor *_tabSupervisor,
     connect(chatView, SIGNAL(showCardInfoPopup(QPoint, QString)), this, SLOT(showCardInfoPopup(QPoint, QString)));
     connect(chatView, SIGNAL(deleteCardInfoPopup(QString)), this, SLOT(deleteCardInfoPopup(QString)));
     connect(chatView, SIGNAL(addMentionTag(QString)), this, SLOT(addMentionTag(QString)));
-    connect(&SettingsCache::instance(), SIGNAL(chatMentionCompleterChanged()), this, SLOT(actCompleterChanged()));
+    connect(&SettingsCache::instance(), SIGNAL(chatMentionCompleterChanged()), this, SLOT(actCompleterChanged()));    
+
     sayLabel = new QLabel;
     sayEdit = new LineEditCompleter;
     sayEdit->setMaxLength(MAX_TEXT_LENGTH);

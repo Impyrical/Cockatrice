@@ -418,6 +418,10 @@ public:
     CardInfoPtr getCardBySimpleName(const QString &cardName) const;
 
     CardSetPtr getSet(const QString &setName);
+    QList<QString> getCardNameList() const
+    {
+        return cards.keys();
+    }
     QList<CardInfoPtr> getCardList() const
     {
         return cards.values();
