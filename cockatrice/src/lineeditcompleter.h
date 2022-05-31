@@ -2,6 +2,7 @@
 #define LINEEDITCOMPLETER_H
 
 #include "customlineedit.h"
+#include "cardcompleter.h"
 
 #include <QFocusEvent>
 #include <QKeyEvent>
@@ -13,6 +14,8 @@ class LineEditCompleter : public LineEditUnfocusable
 private:
     QString cursorWord(const QString &line) const;
     QCompleter *c;
+    CardNameCompleter *cardCompleter;
+
 private slots:
     void insertCompletion(QString);
 
@@ -24,6 +27,7 @@ public:
     explicit LineEditCompleter(QWidget *parent = nullptr);
     void setCompleter(QCompleter *);
     void setCompletionList(QStringList);
+    void setCardCompleter(CardNameCompleter *);
 };
 
 #endif

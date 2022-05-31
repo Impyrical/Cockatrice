@@ -125,9 +125,16 @@ void LineEditCompleter::setCompletionList(QStringList completionList)
     if (!c || c->popup()->isVisible())
         return;
 
+    QStringList cardList = cardCompleter->getNameList();
+
     QStringListModel *model;
     model = (QStringListModel *)(c->model());
     if (model == NULL)
         model = new QStringListModel();
     model->setStringList(completionList);
+}
+
+void LineEditCompleter::setCardCompleter(CardNameCompleter *cardCompleter)
+{
+    this->cardCompleter = cardCompleter; 
 }

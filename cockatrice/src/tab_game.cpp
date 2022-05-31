@@ -1829,9 +1829,13 @@ void TabGame::createMessageDock(bool bReplay)
         connect(gameTimer, SIGNAL(timeout()), this, SLOT(incrementGameTime()));
         gameTimer->start();
 
+        CardNameCompleter *cardCompleter = new CardNameCompleter;
+        cardCompleter->loadCards();
+
         sayLabel = new QLabel;
         sayEdit = new LineEditCompleter;
         sayEdit->setMaxLength(MAX_TEXT_LENGTH);
+        sayEdit->setCardCompleter(cardCompleter);
         sayLabel->setBuddy(sayEdit);
         completer = new QCompleter(autocompleteUserList, sayEdit);
         completer->setCaseSensitivity(Qt::CaseInsensitive);
