@@ -19,14 +19,9 @@ private:
     CardNameCompleter *cardCompleter;
 
     int lastDoubleBracketIndex;
-    bool inCardComplete;
-
-    QStringListModel *cardModel;
-    QListView *cardCompleteList;
 
 private slots:
     void insertCompletion(QString);
-    void toggleCardCompletion(const QStringList &);
 
 protected:
     void keyPressEvent(QKeyEvent *event);
@@ -36,7 +31,6 @@ public:
     explicit LineEditCompleter(QWidget *parent = nullptr);
     void setCompleter(QCompleter *);
     void setCompletionList(QStringList);
-    void setCardCompleter(CardNameCompleter *);
 };
 
 #endif

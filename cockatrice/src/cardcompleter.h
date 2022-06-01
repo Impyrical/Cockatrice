@@ -5,11 +5,13 @@
 #include <QStringList>
 #include <QCompleter>
 #include <QAbstractItemView>
+#include <QCompleter>
 
 typedef QMultiHash<QString, int> TrigramIndex;
 
-class CardNameCompleter
+class CardNameCompleter : public QCompleter
 {
+    Q_OBJECT
     protected:
         TrigramIndex lookupIndex;
         QStringList cardNameList;
@@ -18,10 +20,10 @@ class CardNameCompleter
         void indexName(const QString *, int);
 
     public:
+        explicit CardNameCompleter(QWidget *parent = nullptr);
         void loadCards();
         QStringList processQuery(const QString *);
         QStringList getNameList();
-        explicit CardNameCompleter();
 };
 
 #endif

@@ -9,7 +9,7 @@
 #include <QSet>
 #include <QHash>
 
-CardNameCompleter::CardNameCompleter()
+CardNameCompleter::CardNameCompleter(QWidget *parent) : QCompleter(parent)
 {
 }
 
@@ -26,6 +26,8 @@ void CardNameCompleter::loadCards()
     }
     int msecs = startTime.msecsTo(QTime::currentTime());
     qDebug() << "CardCompleter::loadCards Loaded and indexed " << cardNameList.size() << "cards in" << QString("%1ms").arg(msecs);
+    QStringListModel *model = new QStringListModel(cardNameList, this);
+    setModel(model);
 }
 
 void CardNameCompleter::indexName(const QString *cardName, int index) {
