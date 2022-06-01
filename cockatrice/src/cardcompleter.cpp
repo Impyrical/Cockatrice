@@ -31,33 +31,29 @@ void CardNameCompleter::loadCards()
     int msecs = startTime.msecsTo(QTime::currentTime());
     qDebug() << "CardCompleter::loadCards Loaded and indexed " << cardNameList.size() << "cards in" << QString("%1ms").arg(msecs);
 
-    qDebug() << "Doing some test queries on the list of cards";
-
-    QStringList testQueries = {"jace", "chandra", "sliver"};
-
-    foreach(QString query, testQueries) {
-        QStringList queryResult = processQuery(&query);
-        qDebug() << "CardCompleter::TestQueries querying for " << query << " produced " << queryResult;
-    }
+    // qDebug() << "Doing some test queries on the list of cards";
+    //
+    // QStringList testQueries = {"jace", "chandra", "sliver"};
+    //
+    // foreach(QString query, testQueries) {
+    //     QStringList queryResult = processQuery(&query);
+    //     qDebug() << "CardCompleter::TestQueries querying for " << query << " produced " << queryResult;
+    // }
 }
 
 void CardNameCompleter::indexName(const QString *cardName, int index) {
-    // First get the trigrams of the string
     QStringList trigrams;
     for (int i = 0; i < cardName->size()-3; i++) {
         trigrams.append(cardName->mid(i, 3).toLower());
     }
-    // qDebug() << "CardNameCompleter::indexName " << *cardName << " becomes " << trigrams;
     foreach(QString trigram, trigrams) {
         lookupIndex.insert(trigram, index);
     }
-    // qDebug() << "CardNameCompleter::indexName after inserting " << *cardName << 
-    //     " has first trigram index " << lookupIndex.values(trigrams[0]);
 }
 
 QStringList CardNameCompleter::processQuery(const QString *query)
 {
-    qDebug() << "CardCompleter::processQuery processing query " << *query << " using trigram index";
+    // qDebug() << "CardCompleter::processQuery processing query " << *query << " using trigram index";
     QStringList trigrams;
     for (int i = 0; i < query->size(); i++) {
         trigrams.append(query->mid(i, 3));

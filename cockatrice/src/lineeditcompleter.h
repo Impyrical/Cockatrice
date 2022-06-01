@@ -16,6 +16,9 @@ private:
     QCompleter *c;
     CardNameCompleter *cardCompleter;
 
+    int lastDoubleBracketIndex;
+    bool inCardComplete;
+
 private slots:
     void insertCompletion(QString);
 

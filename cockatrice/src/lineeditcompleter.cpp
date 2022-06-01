@@ -11,6 +11,8 @@
 
 LineEditCompleter::LineEditCompleter(QWidget *parent) : LineEditUnfocusable(parent), c(nullptr)
 {
+    cardCompleter = new CardNameCompleter;
+    cardCompleter->loadCards();
 }
 
 void LineEditCompleter::focusOutEvent(QFocusEvent *e)
@@ -74,6 +76,33 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
     }
 
     LineEditUnfocusable::keyPressEvent(event);
+
+    /*
+     * For card completion, things are a bit complex. Here's the gist of my idea
+     * First, we need to figure out if we're currently in an unclosed double-bracket
+     * Then, we need to make sure there are at least three characters after the brackets, because we use trigrams
+     * Finally, we extract the entire string from after the brackets and use it as a query.
+     *
+     * This accomplishes a few things. First, it should let us easily use multiple bracket pairs correctly.
+     * Second, we can avoid this weird space problem by just grabbing everything after the opening pair
+     */
+    
+    QString beforeCursor = text().left(cursorPosition());
+    int lastDouble = beforeCursor.lastIndexOf("[[");
+    if (lastDouble != -1 && lastDouble > beforeCursor.lastIndexOf("]]")) {
+        // This means that we're inside some brackets, now check if we have a trigram
+        int queryLen = beforeCursor.size() - lastDouble - 2;
+        if (queryLen >= 3) {
+            // Get the actual query
+            QString query = beforeCursor.right(queryLen);
+            qDebug() << "We have a trigram to search on inside the brackets!" << query;
+
+            QStringList queryResults = cardCompleter->processQuery(&query);
+            qDebug() << "Querying for " << query << " produced results: " << queryResults;
+
+        }
+    }
+
     // return if the completer is null or if the most recently typed char was '@'.
     // Only want the popup AFTER typing the first char of the mention.
     if (!c || text().right(1).contains("@")) {
@@ -125,16 +154,9 @@ void LineEditCompleter::setCompletionList(QStringList completionList)
     if (!c || c->popup()->isVisible())
         return;
 
-    QStringList cardList = cardCompleter->getNameList();
-
     QStringListModel *model;
     model = (QStringListModel *)(c->model());
     if (model == NULL)
         model = new QStringListModel();
     model->setStringList(completionList);
-}
-
-void LineEditCompleter::setCardCompleter(CardNameCompleter *cardCompleter)
-{
-    this->cardCompleter = cardCompleter; 
 }
