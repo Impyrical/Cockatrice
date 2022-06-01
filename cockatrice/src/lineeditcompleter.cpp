@@ -12,7 +12,11 @@
 LineEditCompleter::LineEditCompleter(QWidget *parent) : LineEditUnfocusable(parent), c(nullptr)
 {
     cardCompleter = new CardNameCompleter(this);
+    cardCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+    cardCompleter->setMaxVisibleItems(10);
+    cardCompleter->setFilterMode(Qt::MatchStartsWith);
     cardCompleter->loadCards();
+    cardCompleter->setWidget(this);
 }
 
 void LineEditCompleter::focusOutEvent(QFocusEvent *e)
