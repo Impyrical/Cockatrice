@@ -13,6 +13,9 @@ LineEditCompleter::LineEditCompleter(QWidget *parent) : LineEditUnfocusable(pare
 {
     cardCompleter = new CardNameCompleter;
     cardCompleter->loadCards();
+
+    cardModel = new QStringListModel(this);
+    cardCompleteList = new QListView;
 }
 
 void LineEditCompleter::focusOutEvent(QFocusEvent *e)
@@ -91,6 +94,7 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
     int lastDouble = beforeCursor.lastIndexOf("[[");
     if (lastDouble != -1 && lastDouble > beforeCursor.lastIndexOf("]]")) {
         // This means that we're inside some brackets, now check if we have a trigram
+        cardCompleteList->hide();
         int queryLen = beforeCursor.size() - lastDouble - 2;
         if (queryLen >= 3) {
             // Get the actual query
@@ -100,7 +104,12 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
             QStringList queryResults = cardCompleter->processQuery(&query);
             qDebug() << "Querying for " << query << " produced results: " << queryResults;
 
+            toggleCardCompletion(queryResults);
+            cardCompleteList->move(cursorRect().bottomLeft());
+            cardCompleteList->show();
         }
+    } else {
+        cardCompleteList->hide();
     }
 
     // return if the completer is null or if the most recently typed char was '@'.
@@ -127,6 +136,14 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
     c->popup()->setSelectionModel(sm);
     sm->select(c->completionModel()->index(0, 0), QItemSelectionModel::ClearAndSelect);
     sm->setCurrentIndex(c->completionModel()->index(0, 0), QItemSelectionModel::NoUpdate);
+}
+
+void LineEditCompleter::toggleCardCompletion(const QStringList &items)
+{
+    QRect cr = cursorRect();
+    cardModel->setStringList(items);
+    
+    cardCompleteList->setModel(cardModel);
 }
 
 QString LineEditCompleter::cursorWord(const QString &line) const

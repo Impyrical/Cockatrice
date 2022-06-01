@@ -4,6 +4,7 @@
 #include <QKeyEvent>
 #include <QStringList>
 #include <QCompleter>
+#include <QAbstractItemView>
 
 typedef QMultiHash<QString, int> TrigramIndex;
 
@@ -12,7 +13,6 @@ class CardNameCompleter
     protected:
         TrigramIndex lookupIndex;
         QStringList cardNameList;
-        QCompleter internalCompleter;
 
     private:
         void indexName(const QString *, int);

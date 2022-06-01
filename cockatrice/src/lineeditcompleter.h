@@ -7,6 +7,8 @@
 #include <QFocusEvent>
 #include <QKeyEvent>
 #include <QStringList>
+#include <QStringListModel>
+#include <QListView>
 
 class LineEditCompleter : public LineEditUnfocusable
 {
@@ -19,8 +21,12 @@ private:
     int lastDoubleBracketIndex;
     bool inCardComplete;
 
+    QStringListModel *cardModel;
+    QListView *cardCompleteList;
+
 private slots:
     void insertCompletion(QString);
+    void toggleCardCompletion(const QStringList &);
 
 protected:
     void keyPressEvent(QKeyEvent *event);
