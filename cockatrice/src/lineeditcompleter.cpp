@@ -16,6 +16,7 @@ LineEditCompleter::LineEditCompleter(QWidget *parent) : LineEditUnfocusable(pare
 
     cardModel = new QStringListModel(this);
     cardCompleteList = new QListView;
+    cardCompleteList->setWindowFlags(Qt::Popup | Qt::FramelessWindowHint);
 }
 
 void LineEditCompleter::focusOutEvent(QFocusEvent *e)

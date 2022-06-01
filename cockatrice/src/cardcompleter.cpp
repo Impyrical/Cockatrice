@@ -15,10 +15,6 @@ CardNameCompleter::CardNameCompleter()
 
 void CardNameCompleter::loadCards()
 {
-    /*
-     * This requires some thought I think. Obviously we want to start by just grabbing the list of all the card names from the db
-     * However, what do we do with them? Should we feed them to a completer? That seems limited. Perhaps to start with that's fine though
-     */
     qDebug() << "CardCompleter::loadCards Loading cards for the card name completer";
 
     auto startTime = QTime::currentTime();
@@ -30,15 +26,6 @@ void CardNameCompleter::loadCards()
     }
     int msecs = startTime.msecsTo(QTime::currentTime());
     qDebug() << "CardCompleter::loadCards Loaded and indexed " << cardNameList.size() << "cards in" << QString("%1ms").arg(msecs);
-
-    // qDebug() << "Doing some test queries on the list of cards";
-    //
-    // QStringList testQueries = {"jace", "chandra", "sliver"};
-    //
-    // foreach(QString query, testQueries) {
-    //     QStringList queryResult = processQuery(&query);
-    //     qDebug() << "CardCompleter::TestQueries querying for " << query << " produced " << queryResult;
-    // }
 }
 
 void CardNameCompleter::indexName(const QString *cardName, int index) {
@@ -53,7 +40,6 @@ void CardNameCompleter::indexName(const QString *cardName, int index) {
 
 QStringList CardNameCompleter::processQuery(const QString *query)
 {
-    // qDebug() << "CardCompleter::processQuery processing query " << *query << " using trigram index";
     QStringList trigrams;
     for (int i = 0; i < query->size(); i++) {
         trigrams.append(query->mid(i, 3));
