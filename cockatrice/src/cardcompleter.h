@@ -3,8 +3,7 @@
 
 #include <QKeyEvent>
 #include <QStringList>
-#include <QCompleter>
-#include <QAbstractItemView>
+#include <QStringListModel>
 #include <QCompleter>
 
 typedef QMultiHash<QString, int> TrigramIndex;
@@ -18,9 +17,10 @@ class CardNameCompleter : public QCompleter
 
     private:
         void indexName(const QString *, int);
+        QStringListModel *trigramModel;
 
     public:
-        explicit CardNameCompleter(QWidget *parent = nullptr);
+        explicit CardNameCompleter(QObject *parent = nullptr);
         void loadCards();
         QStringList processQuery(const QString *);
         QStringList getNameList();

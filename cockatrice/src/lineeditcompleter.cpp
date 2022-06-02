@@ -15,7 +15,6 @@ LineEditCompleter::LineEditCompleter(QWidget *parent) : LineEditUnfocusable(pare
     cardCompleter->setCaseSensitivity(Qt::CaseInsensitive);
     cardCompleter->setMaxVisibleItems(10);
     cardCompleter->setFilterMode(Qt::MatchStartsWith);
-    cardCompleter->loadCards();
     cardCompleter->setWidget(this);
 }
 
@@ -111,8 +110,6 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
 
             QStringList queryResults = cardCompleter->processQuery(&query);
             qDebug() << "Querying for " << query << " produced results: " << queryResults;
-
-            cardCompleter->setCompletionPrefix(query);
             QRect cr = cursorRect();
             cr.setWidth(cardCompleter->popup()->sizeHintForColumn(0) +
                     cardCompleter->popup()->verticalScrollBar()->sizeHint().width());

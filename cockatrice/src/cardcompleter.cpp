@@ -9,8 +9,9 @@
 #include <QSet>
 #include <QHash>
 
-CardNameCompleter::CardNameCompleter(QWidget *parent) : QCompleter(parent)
+CardNameCompleter::CardNameCompleter(QObject *parent) : QCompleter(parent)
 {
+    loadCards();
 }
 
 void CardNameCompleter::loadCards()
@@ -26,8 +27,8 @@ void CardNameCompleter::loadCards()
     }
     int msecs = startTime.msecsTo(QTime::currentTime());
     qDebug() << "CardCompleter::loadCards Loaded and indexed " << cardNameList.size() << "cards in" << QString("%1ms").arg(msecs);
-    QStringListModel *model = new QStringListModel(cardNameList, this);
-    setModel(model);
+    trigramModel = new QStringListModel(cardNameList, this);
+    setModel(trigramModel);
 }
 
 void CardNameCompleter::indexName(const QString *cardName, int index) {
@@ -58,6 +59,7 @@ QStringList CardNameCompleter::processQuery(const QString *query)
             }
         }
     }
+    trigramModel->setStringList(result);
     return result;
 }
 
