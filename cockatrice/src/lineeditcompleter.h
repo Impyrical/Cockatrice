@@ -22,6 +22,7 @@ private:
 
 private slots:
     void insertCompletion(QString);
+    void insertCardCompletion(QString);
 
 protected:
     void keyPressEvent(QKeyEvent *event);

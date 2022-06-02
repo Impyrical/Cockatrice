@@ -23,7 +23,6 @@ class CardNameCompleter : public QCompleter
         explicit CardNameCompleter(QObject *parent = nullptr);
         void loadCards();
         QStringList processQuery(const QString *);
-        QStringList getNameList();
 };
 
 #endif

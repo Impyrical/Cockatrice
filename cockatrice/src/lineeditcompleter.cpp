@@ -4,6 +4,7 @@
 #include <QCompleter>
 #include <QFocusEvent>
 #include <QKeyEvent>
+#include <QEvent>
 #include <QScrollBar>
 #include <QStringListModel>
 #include <QTextCursor>
@@ -16,6 +17,9 @@ LineEditCompleter::LineEditCompleter(QWidget *parent) : LineEditUnfocusable(pare
     cardCompleter->setMaxVisibleItems(10);
     cardCompleter->setFilterMode(Qt::MatchStartsWith);
     cardCompleter->setWidget(this);
+    cardCompleter->popup()->setTabKeyNavigation(false);
+
+    connect(cardCompleter, SIGNAL(activated(QString)), this, SLOT(insertCardCompletion(QString)));
 }
 
 void LineEditCompleter::focusOutEvent(QFocusEvent *e)
@@ -24,6 +28,7 @@ void LineEditCompleter::focusOutEvent(QFocusEvent *e)
     if (c->popup()->isVisible()) {
         // Remove Popup
         c->popup()->hide();
+        cardCompleter->popup()->hide();
         // Truncate the line to last space or whole string
         QString textValue = text();
         int lastIndex = textValue.length();
@@ -56,10 +61,11 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
                     finalString += " ";
                 setText(finalString);
                 return;
-            }
-            if (cardCompleter->popup()->isVisible()) {
+            } else if (cardCompleter->popup()->isVisible()) {
                 event->ignore();
                 cardCompleter->popup()->hide();
+                qDebug() << "We should fill in the card now" << text();
+                return;
             }
             break;
         case Qt::Key_Space:
@@ -77,11 +83,18 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
                 insert(c->completionModel()->index(c->popup()->currentIndex().row(), 0).data().toString() + " ");
                 return;
             }
-            if (cardCompleter->popup()->isVisible()) {
-                event->ignore();
-                cardCompleter->popup()->hide();
-            }
             break;
+        case Qt::Key_Tab:
+            qDebug() << "Intercepted tab press";
+            // if (cardCompleter->popup()->isVisible()) {
+            //     event->ignore();
+            //     bool backwards = event->modifiers() & Qt::ShiftModifier;
+            //
+            //     qDebug() << "Should move around the completion for cards";
+            //     int start = cardCompleter->currentRow();
+            //     if (!cardCompleter->setCurrentRow(start + 1))
+            //         cardCompleter->setCurrentRow(0);
+            // }
         default:
             break;
     }
@@ -99,21 +112,19 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
      */
     
     QString beforeCursor = text().left(cursorPosition());
-    int lastDouble = beforeCursor.lastIndexOf("[[");
-    if (lastDouble != -1 && lastDouble > beforeCursor.lastIndexOf("]]")) {
+    lastDoubleBracketIndex = beforeCursor.lastIndexOf("[[");
+    if (lastDoubleBracketIndex != -1 && lastDoubleBracketIndex > beforeCursor.lastIndexOf("]]")) {
         // This means that we're inside some brackets, now check if we have a trigram
-        int queryLen = beforeCursor.size() - lastDouble - 2;
+        int queryLen = beforeCursor.size() - lastDoubleBracketIndex - 2;
+        cardCompleter->popup()->hide();
         if (queryLen >= 3) {
             // Get the actual query
             QString query = beforeCursor.right(queryLen);
-            qDebug() << "We have a trigram to search on inside the brackets!" << query;
-
             QStringList queryResults = cardCompleter->processQuery(&query);
-            qDebug() << "Querying for " << query << " produced results: " << queryResults;
             QRect cr = cursorRect();
             cr.setWidth(cardCompleter->popup()->sizeHintForColumn(0) +
                     cardCompleter->popup()->verticalScrollBar()->sizeHint().width());
-            cardCompleter->complete(cr);
+            cardCompleter->complete(cr); 
         }
     }
     // return if the completer is null or if the most recently typed char was '@'.
@@ -153,6 +164,12 @@ void LineEditCompleter::insertCompletion(QString arg)
     QString s_arg = arg + " ";
     setText(text().replace(text().left(cursorPosition()).lastIndexOf(" ") + 1,
                            cursorPosition() - text().left(cursorPosition()).lastIndexOf(" ") - 1, s_arg));
+}
+
+void LineEditCompleter::insertCardCompletion(QString arg)
+{
+    qDebug() << "Should set text in brackets to " << arg << "Starting at" << lastDoubleBracketIndex << " base " << text().left(lastDoubleBracketIndex);
+    setText(text().left(lastDoubleBracketIndex) + QString("[[%1]] ").arg(arg));
 }
 
 void LineEditCompleter::setCompleter(QCompleter *completer)

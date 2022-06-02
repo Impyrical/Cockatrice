@@ -62,10 +62,3 @@ QStringList CardNameCompleter::processQuery(const QString *query)
     trigramModel->setStringList(result);
     return result;
 }
-
-QStringList CardNameCompleter::getNameList()
-{
-    QStringList result = { "foo", "bar", "baz" };
-    qDebug() << "CardCompleter::getNameList Returning the list of cards used for card name completion";
-    return result;
-}
