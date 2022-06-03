@@ -10,6 +10,15 @@
 #include <QStringListModel>
 #include <QListView>
 
+class TestEater : public QObject
+{
+    Q_OBJECT
+    protected:
+        bool eventFilter(QObject *obj, QEvent *event) override;
+    public:
+        TestEater(QObject *parent = nullptr);
+};
+
 class LineEditCompleter : public LineEditUnfocusable
 {
     Q_OBJECT
@@ -19,6 +28,7 @@ private:
     CardNameCompleter *cardCompleter;
 
     int lastDoubleBracketIndex;
+    void moveCompleter(QCompleter *, int);
 
 private slots:
     void insertCompletion(QString);
@@ -26,6 +36,7 @@ private slots:
 
 protected:
     void keyPressEvent(QKeyEvent *event);
+    bool event(QEvent *event);
     void focusOutEvent(QFocusEvent *e);
 
 public:

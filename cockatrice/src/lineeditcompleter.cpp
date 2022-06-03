@@ -1,5 +1,6 @@
 #include "lineeditcompleter.h"
 
+#include <QObject>
 #include <QAbstractItemView>
 #include <QCompleter>
 #include <QFocusEvent>
@@ -11,6 +12,30 @@
 #include <QWidget>
 #include <QApplication>
 
+
+TestEater::TestEater(QObject *parent) : QObject(parent)
+{
+}
+
+bool TestEater::eventFilter(QObject *obj, QEvent *event)
+{
+    switch (event->type()) {
+        case QEvent::ShortcutOverride:
+            {
+                QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+                if (keyEvent->key() == Qt::Key_Tab) {
+                    qDebug() << "Got shortcut override for tab" << obj;
+
+                    return true;
+                }
+                return QObject::eventFilter(obj, event);
+            }
+        default:
+            return QObject::eventFilter(obj, event);
+    }
+}
+
+
 LineEditCompleter::LineEditCompleter(QWidget *parent) : LineEditUnfocusable(parent), c(nullptr)
 {
     cardCompleter = new CardNameCompleter(this);
@@ -21,6 +46,47 @@ LineEditCompleter::LineEditCompleter(QWidget *parent) : LineEditUnfocusable(pare
     cardCompleter->popup()->setTabKeyNavigation(false);
 
     connect(cardCompleter, SIGNAL(activated(QString)), this, SLOT(insertCardCompletion(QString)));
+    // TestEater *eater = new TestEater(this);
+    // installEventFilter(eater);
+}
+
+void LineEditCompleter::moveCompleter(QCompleter *completer, int offset)
+{
+    int row = completer->currentRow();
+    QItemSelectionModel *sm = new QItemSelectionModel(completer->completionModel());
+    completer->popup()->setSelectionModel(sm);
+    QModelIndex targetIndex = offset >= 0 ? completer->completionModel()->index(0, 0) : completer->completionModel()->index(completer->completionCount()-1, 0);
+    if (completer->completionModel()->hasIndex(row+offset, 0)) {
+        targetIndex = completer->completionModel()->index(row + offset, 0);
+    }
+    completer->setCurrentRow(targetIndex.row());
+    sm->select(targetIndex, QItemSelectionModel::ClearAndSelect);
+    sm->setCurrentIndex(targetIndex, QItemSelectionModel::NoUpdate);
+}
+
+bool LineEditCompleter::event(QEvent *event)
+{
+    if (event->type() == QEvent::ShortcutOverride)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if (keyEvent->key() == Qt::Key_Tab) {
+            if (cardCompleter->popup()->isVisible()) {
+                bool backwards = QApplication::keyboardModifiers() & Qt::ShiftModifier;
+                if (backwards) {
+                    qDebug("Trying to move back one row of completer");
+                    moveCompleter(cardCompleter, -1);
+                } else {
+                    qDebug("Trying to advance row of completer");
+                    moveCompleter(cardCompleter, 1);
+                }
+                return true;
+            } else if (c->popup()->isVisible()) {
+                moveCompleter(c, 1);
+                return true;
+            }
+        }
+    }
+    return QWidget::event(event);
 }
 
 void LineEditCompleter::focusOutEvent(QFocusEvent *e)
@@ -90,9 +156,6 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
             } 
             // NOTE: Do not do anything for the card completer. We want to allow people to input spaces
             break;
-        case Qt::Key_Tab:
-            qDebug("Tab key pressed");
-            return;
         default:
             break;
     }
@@ -113,11 +176,7 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
             cr.setWidth(cardCompleter->popup()->sizeHintForColumn(0) +
                     cardCompleter->popup()->verticalScrollBar()->sizeHint().width());
             cardCompleter->complete(cr); 
-
-            QItemSelectionModel *sm = new QItemSelectionModel(cardCompleter->completionModel());
-            cardCompleter->popup()->setSelectionModel(sm);
-            sm->select(cardCompleter->completionModel()->index(0, 0), QItemSelectionModel::ClearAndSelect);
-            sm->setCurrentIndex(cardCompleter->completionModel()->index(0, 0), QItemSelectionModel::NoUpdate);
+            moveCompleter(cardCompleter, 0);
         }
     }
     // return if the completer is null or if the most recently typed char was '@'.
@@ -140,10 +199,7 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
     c->complete(cr);
 
     // Select first item in the completion popup
-    QItemSelectionModel *sm = new QItemSelectionModel(c->completionModel());
-    c->popup()->setSelectionModel(sm);
-    sm->select(c->completionModel()->index(0, 0), QItemSelectionModel::ClearAndSelect);
-    sm->setCurrentIndex(c->completionModel()->index(0, 0), QItemSelectionModel::NoUpdate);
+    moveCompleter(c, 0);
 }
 
 QString LineEditCompleter::cursorWord(const QString &line) const
