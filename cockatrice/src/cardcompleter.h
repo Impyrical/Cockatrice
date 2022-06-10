@@ -14,6 +14,7 @@ class CardNameCompleter : public QCompleter
     protected:
         TrigramIndex lookupIndex;
         QStringList cardNameList;
+        bool event(QEvent *);
 
     private:
         void indexName(const QString *, int);

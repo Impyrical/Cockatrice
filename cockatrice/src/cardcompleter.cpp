@@ -31,6 +31,12 @@ void CardNameCompleter::loadCards()
     setModel(trigramModel);
 }
 
+bool CardNameCompleter::event(QEvent *event)
+{
+    qDebug() << "Caught event in completer" << event->type();
+    return false;
+}
+
 void CardNameCompleter::indexName(const QString *cardName, int index) {
     QStringList trigrams;
     for (int i = 0; i < cardName->size()-3; i++) {

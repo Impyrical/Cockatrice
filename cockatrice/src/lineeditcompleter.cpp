@@ -13,29 +13,6 @@
 #include <QApplication>
 
 
-TestEater::TestEater(QObject *parent) : QObject(parent)
-{
-}
-
-bool TestEater::eventFilter(QObject *obj, QEvent *event)
-{
-    switch (event->type()) {
-        case QEvent::ShortcutOverride:
-            {
-                QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-                if (keyEvent->key() == Qt::Key_Tab) {
-                    qDebug() << "Got shortcut override for tab" << obj;
-
-                    return true;
-                }
-                return QObject::eventFilter(obj, event);
-            }
-        default:
-            return QObject::eventFilter(obj, event);
-    }
-}
-
-
 LineEditCompleter::LineEditCompleter(QWidget *parent) : LineEditUnfocusable(parent), c(nullptr)
 {
     cardCompleter = new CardNameCompleter(this);
@@ -46,12 +23,11 @@ LineEditCompleter::LineEditCompleter(QWidget *parent) : LineEditUnfocusable(pare
     cardCompleter->popup()->setTabKeyNavigation(false);
 
     connect(cardCompleter, SIGNAL(activated(QString)), this, SLOT(insertCardCompletion(QString)));
-    // TestEater *eater = new TestEater(this);
-    // installEventFilter(eater);
 }
 
-void LineEditCompleter::moveCompleter(QCompleter *completer, int offset)
+void LineEditCompleter::moveCompleter(int offset)
 {
+    QCompleter *completer = cardCompleter->popup()->isVisible() ? cardCompleter : c;
     int row = completer->currentRow();
     QItemSelectionModel *sm = new QItemSelectionModel(completer->completionModel());
     completer->popup()->setSelectionModel(sm);
@@ -66,46 +42,20 @@ void LineEditCompleter::moveCompleter(QCompleter *completer, int offset)
 
 bool LineEditCompleter::event(QEvent *event)
 {
-    if (event->type() == QEvent::ShortcutOverride)
+    if (event->type() == QEvent::ShortcutOverride || event->type() == QEvent::KeyPress)
     {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
         if (keyEvent->key() == Qt::Key_Tab) {
+            moveCompleter(1);
+        } else if (keyEvent->key() == Qt::Key_Backtab) {
+            moveCompleter(-1);
+        } else if (keyEvent->key() == Qt::Key_Shift) {
             if (cardCompleter->popup()->isVisible()) {
-                bool backwards = QApplication::keyboardModifiers() & Qt::ShiftModifier;
-                if (backwards) {
-                    qDebug("Trying to move back one row of completer");
-                    moveCompleter(cardCompleter, -1);
-                } else {
-                    qDebug("Trying to advance row of completer");
-                    moveCompleter(cardCompleter, 1);
-                }
-                return true;
-            } else if (c->popup()->isVisible()) {
-                moveCompleter(c, 1);
                 return true;
             }
         }
     }
     return QWidget::event(event);
-}
-
-void LineEditCompleter::focusOutEvent(QFocusEvent *e)
-{
-    LineEditUnfocusable::focusOutEvent(e);
-    if (c->popup()->isVisible()) {
-        // Remove Popup
-        c->popup()->hide();
-        // Truncate the line to last space or whole string
-        QString textValue = text();
-        int lastIndex = textValue.length();
-        int lastWordStartIndex = textValue.lastIndexOf(" ") + 1;
-        int leftShift = qMin(lastIndex, lastWordStartIndex);
-        setText(textValue.left(leftShift));
-        // Insert highlighted line from popup
-        insert(c->completionModel()->index(c->popup()->currentIndex().row(), 0).data().toString() + " ");
-        // Set focus back to the textbox since tab was pressed
-        setFocus();
-    }
 }
 
 void LineEditCompleter::keyPressEvent(QKeyEvent *event)
@@ -176,7 +126,6 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
             cr.setWidth(cardCompleter->popup()->sizeHintForColumn(0) +
                     cardCompleter->popup()->verticalScrollBar()->sizeHint().width());
             cardCompleter->complete(cr); 
-            moveCompleter(cardCompleter, 0);
         }
     }
     // return if the completer is null or if the most recently typed char was '@'.
@@ -199,7 +148,7 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
     c->complete(cr);
 
     // Select first item in the completion popup
-    moveCompleter(c, 0);
+    moveCompleter(0);
 }
 
 QString LineEditCompleter::cursorWord(const QString &line) const
