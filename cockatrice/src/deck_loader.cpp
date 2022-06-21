@@ -35,6 +35,7 @@ DeckLoader::DeckLoader(const DeckLoader &other)
 
 bool DeckLoader::loadFromFile(const QString &fileName, FileFormat fmt)
 {
+    qDebug() << "Loading deck from file" << fileName;
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return false;
@@ -74,6 +75,7 @@ bool DeckLoader::loadFromFile(const QString &fileName, FileFormat fmt)
 
 bool DeckLoader::loadFromRemote(const QString &nativeString, int remoteDeckId)
 {
+    qDebug() << "Loading deck from remote" << remoteDeckId;
     bool result = loadFromString_Native(nativeString);
     if (result) {
         lastFileName = QString();
