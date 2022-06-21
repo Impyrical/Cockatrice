@@ -2,6 +2,7 @@
 
 #include "carddatabase.h"
 #include "decklist.h"
+#include "decklist_validator.h"
 #include "main.h"
 
 #include <QDebug>
@@ -15,22 +16,32 @@ const QStringList DeckLoader::fileNameFilters = QStringList()
 
 DeckLoader::DeckLoader() : DeckList(), lastFileName(QString()), lastFileFormat(CockatriceFormat), lastRemoteDeckId(-1)
 {
+    initializeCleanersAndValidators();
 }
 
 DeckLoader::DeckLoader(const QString &nativeString)
     : DeckList(nativeString), lastFileName(QString()), lastFileFormat(CockatriceFormat), lastRemoteDeckId(-1)
 {
+    initializeCleanersAndValidators();
 }
 
 DeckLoader::DeckLoader(const DeckList &other)
     : DeckList(other), lastFileName(QString()), lastFileFormat(CockatriceFormat), lastRemoteDeckId(-1)
 {
+    initializeCleanersAndValidators();
 }
 
 DeckLoader::DeckLoader(const DeckLoader &other)
     : DeckList(other), lastFileName(other.lastFileName), lastFileFormat(other.lastFileFormat),
       lastRemoteDeckId(other.lastRemoteDeckId)
 {
+    initializeCleanersAndValidators();
+}
+
+void DeckLoader::initializeCleanersAndValidators()
+{
+    addCleanerFunction(new CardCountCleaner);
+    addValidationFunction(new CardPresentValidator);
 }
 
 bool DeckLoader::loadFromFile(const QString &fileName, FileFormat fmt)

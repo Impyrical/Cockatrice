@@ -19,10 +19,27 @@ class QIODevice;
 class QTextStream;
 
 class InnerDecklistNode;
+class DeckList;
 
 #define DECK_ZONE_MAIN "main"
 #define DECK_ZONE_SIDE "side"
 #define DECK_ZONE_TOKENS "tokens"
+
+class ValidationFunction
+{
+    protected:
+        DeckList *list;
+    public:
+        virtual bool operator()(const QString cardname) = 0;
+        void setDecklist(DeckList *list) { list = list; };
+        QString errorMessage;
+};
+
+class CleanerFunction
+{
+    public:
+        virtual void operator()(DeckList *list) = 0;
+};
 
 class SideboardPlan
 {
@@ -179,6 +196,8 @@ private:
     InnerDecklistNode *root;
     void getCardListHelper(InnerDecklistNode *node, QSet<QString> &result) const;
     InnerDecklistNode *getZoneObjFromName(QString zoneName);
+    QVector<ValidationFunction *> validators;
+    QVector<CleanerFunction *> cleaners;
 
 protected:
     virtual QString getCardZoneFromName(const QString /*cardName*/, QString currentZoneName)
@@ -216,6 +235,7 @@ public:
     {
         return comments;
     }
+    QString loadErrorMessage;
     QList<MoveCard_ToZone> getCurrentSideboardPlan();
     void setCurrentSideboardPlan(const QList<MoveCard_ToZone> &plan);
     const QMap<QString, SideboardPlan *> &getSideboardPlans() const
@@ -235,6 +255,12 @@ public:
     bool saveToStream_Plain(QTextStream &stream, bool prefixSideboardCards, bool slashTappedOutSplitCards);
     bool saveToFile_Plain(QIODevice *device, bool prefixSideboardCards = true, bool slashTappedOutSplitCards = false);
     QString writeToString_Plain(bool prefixSideboardCards = true, bool slashTappedOutSplitCards = false);
+
+    bool validateCard(QString cardName);
+    void addValidationFunction(ValidationFunction *func);
+    void addCleanerFunction(CleanerFunction *func) {
+        cleaners.append(func);
+    }
 
     void cleanList();
     bool isEmpty() const

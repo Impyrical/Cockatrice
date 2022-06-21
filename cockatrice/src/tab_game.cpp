@@ -278,7 +278,7 @@ void DeckViewContainer::loadLocalDeck()
         error = deckString.length() > MAX_FILE_LENGTH;
     }
     if (error) {
-        QMessageBox::critical(this, tr("Error"), tr("The selected file could not be loaded."));
+        QMessageBox::critical(this, tr("Error"), deck.getLoadError());
         return;
     }
 

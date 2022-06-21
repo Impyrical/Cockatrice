@@ -784,8 +784,10 @@ void TabDeckEditor::actLoadDeck()
     if (l->loadFromFile(fileName, fmt)) {
         setSaveStatus(false);
         setDeck(l);
-    } else
+    } else {
+        QMessageBox::critical(this, tr("Error"), l->getLoadError());
         delete l;
+    }
     setSaveStatus(true);
 }
 

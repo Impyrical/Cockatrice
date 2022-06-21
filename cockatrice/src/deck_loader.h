@@ -22,6 +22,8 @@ private:
     FileFormat lastFileFormat;
     int lastRemoteDeckId;
 
+    void initializeCleanersAndValidators();
+
 public:
     DeckLoader();
     DeckLoader(const QString &nativeString);
@@ -38,6 +40,11 @@ public:
     int getLastRemoteDeckId() const
     {
         return lastRemoteDeckId;
+    }
+
+    const QString getLoadError() const
+    {
+        return tr("Invalid deck list:") + "\n" + loadErrorMessage;
     }
 
     static FileFormat getFormatFromName(const QString &fileName);

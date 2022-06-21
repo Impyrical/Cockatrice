@@ -2,6 +2,7 @@
 
 #include "deck_loader.h"
 #include "settingscache.h"
+#include "decklist_validator.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -60,14 +61,14 @@ void DlgLoadDeckFromClipboard::actOK()
             deckList = deckLoader;
             accept();
         } else {
-            QMessageBox::critical(this, tr("Error"), tr("Invalid deck list."));
+            QMessageBox::critical(this, tr("Error"), deckLoader->getLoadError());
             delete deckLoader;
         }
     } else if (deckLoader->loadFromStream_Plain(stream)) {
         deckList = deckLoader;
         accept();
     } else {
-        QMessageBox::critical(this, tr("Error"), tr("Invalid deck list."));
+        QMessageBox::critical(this, tr("Error"), deckLoader->getLoadError());
         delete deckLoader;
     }
 }

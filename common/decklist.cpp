@@ -623,10 +623,17 @@ bool DeckList::loadFromStream_Plain(QTextStream &in)
         // get zone name based on if it's in sideboard
         QString zoneName = getCardZoneFromName(cardName, sideboard ? DECK_ZONE_SIDE : DECK_ZONE_MAIN);
 
+        if (!validateCard(cardName)) {
+            return false;
+        }
+
         // make new entry in decklist
         new DecklistCardNode(cardName, amount, getZoneObjFromName(zoneName));
     }
 
+    for (CleanerFunction *cleaner : cleaners) {
+        (*cleaner)(this);
+    }
     updateDeckHash();
     return true;
 }
@@ -830,4 +837,21 @@ void DeckList::updateDeckHash()
     deckHash = (isValidDeckList) ? QString::number(number, 32).rightJustified(8, '0') : "INVALID";
 
     emit deckHashChanged();
+}
+
+void DeckList::addValidationFunction(ValidationFunction *func)
+{
+    func->setDecklist(this);
+    validators.append(func);
+}
+
+bool DeckList::validateCard(QString cardName)
+{
+    for (ValidationFunction *v : validators) {
+        if (!(*v)(cardName)) {
+            loadErrorMessage = v->errorMessage;
+            return false;
+        }
+    }
+    return true;
 }
