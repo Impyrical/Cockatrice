@@ -5,13 +5,12 @@
 #include <QVector>
 
 #include "decklist.h"
-#include "main.h"
 
 class CardPresentValidator : public ValidationFunction
 {
     public:
         CardPresentValidator();
-        bool operator()(const QString cardname) override;
+        bool operator()(const QString cardName) override;
 };
 
 #endif

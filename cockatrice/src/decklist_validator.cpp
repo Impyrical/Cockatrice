@@ -1,12 +1,20 @@
 #include "decklist_validator.h"
+
+#include "main.h"
+#include "carddatabase.h"
+
 #include <QDebug>
 
 CardPresentValidator::CardPresentValidator()
 {
 }
 
-bool CardPresentValidator::operator()(const QString cardname)
+bool CardPresentValidator::operator()(const QString cardName)
 {
-    qDebug() << "Checking if " << cardname << "is valid";
+    if (db->getCard(cardName).isNull()) {
+        errorMessage = QString("Card not present in database: %1").arg(cardName);
+        return false;
+    }
+    errorMessage = "";
     return true;
 }

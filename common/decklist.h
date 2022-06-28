@@ -228,6 +228,7 @@ public:
     {
         return comments;
     }
+    QString loadErrorMessage;
     QList<MoveCard_ToZone> getCurrentSideboardPlan();
     void setCurrentSideboardPlan(const QList<MoveCard_ToZone> &plan);
     const QMap<QString, SideboardPlan *> &getSideboardPlans() const

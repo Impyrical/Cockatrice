@@ -623,7 +623,9 @@ bool DeckList::loadFromStream_Plain(QTextStream &in)
         // get zone name based on if it's in sideboard
         QString zoneName = getCardZoneFromName(cardName, sideboard ? DECK_ZONE_SIDE : DECK_ZONE_MAIN);
 
-        validateCard(cardName);
+        if (!validateCard(cardName)) {
+            return false;
+        }
 
         // make new entry in decklist
         new DecklistCardNode(cardName, amount, getZoneObjFromName(zoneName));
@@ -845,6 +847,7 @@ bool DeckList::validateCard(QString cardName)
     qDebug() << "Validating card" << cardName;
     for (ValidationFunction *v : validators) {
         if (!(*v)(cardName)) {
+            loadErrorMessage = v->errorMessage;
             return false;
         }
     }
