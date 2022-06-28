@@ -35,6 +35,12 @@ class ValidationFunction
         QString errorMessage;
 };
 
+class CleanerFunction
+{
+    public:
+        virtual void operator()(DeckList *list) = 0;
+};
+
 class SideboardPlan
 {
 private:
@@ -191,6 +197,7 @@ private:
     void getCardListHelper(InnerDecklistNode *node, QSet<QString> &result) const;
     InnerDecklistNode *getZoneObjFromName(QString zoneName);
     QVector<ValidationFunction *> validators;
+    QVector<CleanerFunction *> cleaners;
 
 protected:
     virtual QString getCardZoneFromName(const QString /*cardName*/, QString currentZoneName)
@@ -251,7 +258,9 @@ public:
 
     bool validateCard(QString cardName);
     void addValidationFunction(ValidationFunction *func);
-    void alertFailed(QString cardName, QString error);
+    void addCleanerFunction(CleanerFunction *func) {
+        cleaners.append(func);
+    }
 
     void cleanList();
     bool isEmpty() const

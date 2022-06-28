@@ -9,8 +9,13 @@
 class CardPresentValidator : public ValidationFunction
 {
     public:
-        CardPresentValidator();
         bool operator()(const QString cardName) override;
+};
+
+class CardCountCleaner : public CleanerFunction
+{
+    public:
+        void operator()(DeckList *list) override;
 };
 
 #endif

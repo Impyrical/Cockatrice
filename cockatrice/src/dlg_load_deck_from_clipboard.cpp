@@ -57,6 +57,7 @@ void DlgLoadDeckFromClipboard::actOK()
 
     auto *deckLoader = new DeckLoader;
     deckLoader->addValidationFunction(new CardPresentValidator);
+    deckLoader->addCleanerFunction(new CardCountCleaner);
     if (buffer.contains("<cockatrice_deck version=\"1\">")) {
         if (deckLoader->loadFromString_Native(buffer)) {
             deckList = deckLoader;

@@ -631,6 +631,9 @@ bool DeckList::loadFromStream_Plain(QTextStream &in)
         new DecklistCardNode(cardName, amount, getZoneObjFromName(zoneName));
     }
 
+    for (CleanerFunction *cleaner : cleaners) {
+        (*cleaner)(this);
+    }
     updateDeckHash();
     return true;
 }
@@ -852,8 +855,4 @@ bool DeckList::validateCard(QString cardName)
         }
     }
     return true;
-}
-
-void DeckList::alertFailed(QString cardName, QString error)
-{
 }
