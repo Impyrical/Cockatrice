@@ -149,15 +149,15 @@ void PictureLoaderWorker::processLoadQueue()
         QString cardName = cardBeingLoaded.getCard()->getName();
         QString correctedCardName = cardBeingLoaded.getCard()->getCorrectedName();
 
-        qDebug() << "PictureLoader: [card: " << cardName << " set: " << setName << "]: Trying to load picture";
+        // qDebug() << "PictureLoader: [card: " << cardName << " set: " << setName << "]: Trying to load picture";
 
         if (cardImageExistsOnDisk(setName, correctedCardName)) {
             continue;
         }
 
         if (picDownload) {
-            qDebug() << "PictureLoader: [card: " << cardName << " set: " << setName
-                     << "]: Picture not found on disk, trying to download";
+            // qDebug() << "PictureLoader: [card: " << cardName << " set: " << setName
+            //          << "]: Picture not found on disk, trying to download";
             cardsToDownload.append(cardBeingLoaded);
             cardBeingLoaded.clear();
             if (!downloadRunning) {
@@ -215,8 +215,8 @@ bool PictureLoaderWorker::cardImageExistsOnDisk(QString &setName, QString &corre
     for (const auto &picsPath : picsPaths) {
         imgReader.setFileName(picsPath);
         if (imgReader.read(&image)) {
-            qDebug() << "PictureLoader: [card: " << correctedCardname << " set: " << setName
-                     << "]: Picture found on disk.";
+            // qDebug() << "PictureLoader: [card: " << correctedCardname << " set: " << setName
+            //          << "]: Picture found on disk.";
             imageLoaded(cardBeingLoaded.getCard(), image);
             return true;
         }
@@ -277,18 +277,18 @@ QString PictureToLoad::transformUrl(const QString &urlTemplate) const
         }
         QString propertyValue = card->getProperty(fillPropertyName);
         if (propertyValue.isEmpty()) {
-            qDebug() << "PictureLoader: [card: " << card->getName() << " set: " << getSetName()
-                     << "]: Requested property (" << fillPropertyName << ") for Url template (" << urlTemplate
-                     << ") is not available";
+            // qDebug() << "PictureLoader: [card: " << card->getName() << " set: " << getSetName()
+            //          << "]: Requested property (" << fillPropertyName << ") for Url template (" << urlTemplate
+            //          << ") is not available";
             return QString();
         } else {
             if (!fillWith.isEmpty()) {
                 int fillLength = fillWith.length();
                 int propLength = propertyValue.length();
                 if (fillLength < propLength) {
-                    qDebug() << "PictureLoader: [card: " << card->getName() << " set: " << getSetName()
-                             << "]: Requested property (" << fillPropertyName << ") for Url template (" << urlTemplate
-                             << ") is longer than fill specification (" << fillWith << ")";
+                    // qDebug() << "PictureLoader: [card: " << card->getName() << " set: " << getSetName()
+                    //          << "]: Requested property (" << fillPropertyName << ") for Url template (" << urlTemplate
+                    //          << ") is longer than fill specification (" << fillWith << ")";
                     return QString();
                 } else {
                     propertyValue = fillWith.left(fillLength - propLength) + propertyValue;
@@ -320,18 +320,18 @@ QString PictureToLoad::transformUrl(const QString &urlTemplate) const
             }
             QString propertyValue = card->getSetProperty(set->getShortName(), fillPropertyName);
             if (propertyValue.isEmpty()) {
-                qDebug() << "PictureLoader: [card: " << card->getName() << " set: " << getSetName()
-                         << "]: Requested set property (" << fillPropertyName << ") for Url template (" << urlTemplate
-                         << ") is not available";
+                // qDebug() << "PictureLoader: [card: " << card->getName() << " set: " << getSetName()
+                //          << "]: Requested set property (" << fillPropertyName << ") for Url template (" << urlTemplate
+                //          << ") is not available";
                 return QString();
             } else {
                 if (!fillWith.isEmpty()) {
                     int fillLength = fillWith.length();
                     int propLength = propertyValue.length();
                     if (fillLength < propLength) {
-                        qDebug() << "PictureLoader: [card: " << card->getName() << " set: " << getSetName()
-                                 << "]: Requested set property (" << fillPropertyName << ") for Url template ("
-                                 << urlTemplate << ") is longer than fill specification (" << fillWith << ")";
+                        // qDebug() << "PictureLoader: [card: " << card->getName() << " set: " << getSetName()
+                        //          << "]: Requested set property (" << fillPropertyName << ") for Url template ("
+                        //          << urlTemplate << ") is longer than fill specification (" << fillWith << ")";
                         return QString();
                     } else {
                         propertyValue = fillWith.left(fillLength - propLength) + propertyValue;

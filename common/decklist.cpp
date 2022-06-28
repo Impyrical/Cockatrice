@@ -1,5 +1,7 @@
 #include "decklist.h"
 
+#include "decklist_validator.h"
+
 #include <QCryptographicHash>
 #include <QDebug>
 #include <QFile>
@@ -575,6 +577,9 @@ bool DeckList::loadFromStream_Plain(QTextStream &in)
         ++index;
     }
 
+    DecklistValidator validator = DecklistValidator(this);
+    validator.addValidationFunction(new CardPresentValidator);
+
     // parse decklist
     for (; index < max_line; ++index) {
 
@@ -622,6 +627,8 @@ bool DeckList::loadFromStream_Plain(QTextStream &in)
 
         // get zone name based on if it's in sideboard
         QString zoneName = getCardZoneFromName(cardName, sideboard ? DECK_ZONE_SIDE : DECK_ZONE_MAIN);
+
+        validator.validateCard(cardName);
 
         // make new entry in decklist
         new DecklistCardNode(cardName, amount, getZoneObjFromName(zoneName));
