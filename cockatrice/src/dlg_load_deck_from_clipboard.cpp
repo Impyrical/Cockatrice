@@ -56,22 +56,19 @@ void DlgLoadDeckFromClipboard::actOK()
     QTextStream stream(&buffer);
 
     auto *deckLoader = new DeckLoader;
-    deckLoader->addValidationFunction(new CardPresentValidator);
-    deckLoader->addCleanerFunction(new CardCountCleaner);
     if (buffer.contains("<cockatrice_deck version=\"1\">")) {
         if (deckLoader->loadFromString_Native(buffer)) {
             deckList = deckLoader;
             accept();
         } else {
-            QMessageBox::critical(this, tr("Error"), tr("Invalid deck list."));
+            QMessageBox::critical(this, tr("Error"), deckLoader->getLoadError());
             delete deckLoader;
         }
     } else if (deckLoader->loadFromStream_Plain(stream)) {
         deckList = deckLoader;
         accept();
     } else {
-        QString error = tr("Invalid deck list.") + "\n" + deckLoader->loadErrorMessage;
-        QMessageBox::critical(this, tr("Error"), error);
+        QMessageBox::critical(this, tr("Error"), deckLoader->getLoadError());
         delete deckLoader;
     }
 }

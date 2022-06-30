@@ -623,6 +623,7 @@ bool DeckList::loadFromStream_Plain(QTextStream &in)
         // get zone name based on if it's in sideboard
         QString zoneName = getCardZoneFromName(cardName, sideboard ? DECK_ZONE_SIDE : DECK_ZONE_MAIN);
 
+        // Not all lines should be validated - some decklists have things like 'maybeboard' etc
         if (!validateCard(cardName)) {
             return false;
         }
