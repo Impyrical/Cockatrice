@@ -2,6 +2,10 @@
 #include "cardcompleter.h"
 #include "carddatabase.h"
 
+#include <cstdio>
+#include <iostream>
+#include <fstream>
+
 #include <QStringListModel>
 #include <QDebug>
 #include <QTime>
@@ -61,4 +65,49 @@ QStringList CardNameCompleter::processQuery(const QString *query)
     }
     trigramModel->setStringList(result);
     return result;
+}
+
+NaiveCardCompleter::NaiveCardCompleter(QObject *parent) : QCompleter(parent)
+{
+    loadCards();
+}
+
+void NaiveCardCompleter::loadCards()
+{
+    qDebug() << "Naive card completer loading cards";
+    auto startTime = QTime::currentTime();
+    int count = 0;
+    foreach (QString cardName, db->getCardNameList()) {
+        cardNameList.append(cardName);
+        count++;
+    }
+    int msecs = startTime.msecsTo(QTime::currentTime());
+    qDebug() << "NaiveCardCompleter::loadCards Loaded and indexed " << cardNameList.size() << "cards in" << QString("%1ms").arg(msecs);
+}
+
+void BenchmarkCardCompletion() {
+    qDebug() << "BENCHMARK::Running simple benchmark to compare performance of trigram completion with other";
+
+    // First load the cards
+    CardNameCompleter *trigramCompleter = new CardNameCompleter();
+    NaiveCardCompleter *simpleCompleter = new NaiveCardCompleter();
+
+    QString simpleQuery = "Testament of Faith";
+
+    // Create a file to graph from
+    std::ofstream resultFile;
+    resultFile.open("complete_bench.csv", std::ofstream::out | std::ofstream::trunc);
+    resultFile << "querylen,simple,trigram\n";
+    // // Note we start at 3 since we are using trigrams
+    for (int i = 3; i < simpleQuery.length(); i++) {
+        QString subquery = simpleQuery.first(i);
+        // First query the trigram completer
+        auto trigramStart = QTime::currentTime();
+        int trigramTime = trigramStart.msecsTo(QTime::currentTime());
+        auto simpleStart = QTime::currentTime();
+        int simpleTime = simpleStart.msecsTo(QTime::currentTime());
+        resultFile << QString("%1,%2,%3").arg(QString::number(i),QString::number(simpleTime),QString::number(trigramTime)).toStdString();
+        resultFile << "\n";
+    }
+    resultFile.close();
 }

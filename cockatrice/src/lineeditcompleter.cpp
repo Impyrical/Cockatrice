@@ -1,4 +1,5 @@
 #include "lineeditcompleter.h"
+#include "cardcompleter.h"
 
 #include <QObject>
 #include <QAbstractItemView>
@@ -15,6 +16,8 @@
 
 LineEditCompleter::LineEditCompleter(QWidget *parent) : LineEditUnfocusable(parent), c(nullptr)
 {
+    BenchmarkCardCompletion();
+
     cardCompleter = new CardNameCompleter(this);
     cardCompleter->setCaseSensitivity(Qt::CaseInsensitive);
     cardCompleter->setMaxVisibleItems(10);
@@ -103,7 +106,7 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
                 // Insert highlighted line from popup
                 insert(c->completionModel()->index(c->popup()->currentIndex().row(), 0).data().toString() + " ");
                 return;
-            } 
+            }
             // NOTE: Do not do anything for the card completer. We want to allow people to input spaces
             break;
         default:
@@ -125,7 +128,7 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
             QRect cr = cursorRect();
             cr.setWidth(cardCompleter->popup()->sizeHintForColumn(0) +
                     cardCompleter->popup()->verticalScrollBar()->sizeHint().width());
-            cardCompleter->complete(cr); 
+            cardCompleter->complete(cr);
         }
     }
     // return if the completer is null or if the most recently typed char was '@'.

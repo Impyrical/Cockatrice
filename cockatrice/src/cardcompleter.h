@@ -5,6 +5,7 @@
 #include <QStringList>
 #include <QStringListModel>
 #include <QCompleter>
+#include <qtmetamacros.h>
 
 typedef QMultiHash<QString, int> TrigramIndex;
 
@@ -24,5 +25,17 @@ class CardNameCompleter : public QCompleter
         void loadCards();
         QStringList processQuery(const QString *);
 };
+
+class NaiveCardCompleter : public QCompleter
+{
+    Q_OBJECT
+    protected:
+        QStringList cardNameList;
+    public:
+        explicit NaiveCardCompleter(QObject *parent = nullptr);
+        void loadCards();
+};
+
+void BenchmarkCardCompletion();
 
 #endif
