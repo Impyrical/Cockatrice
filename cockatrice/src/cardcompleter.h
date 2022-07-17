@@ -23,7 +23,7 @@ class CardNameCompleter : public QCompleter
     public:
         explicit CardNameCompleter(QObject *parent = nullptr);
         void loadCards();
-        QStringList processQuery(const QString *);
+        void processQuery(const QString);
 };
 
 class NaiveCardCompleter : public QCompleter
@@ -34,6 +34,7 @@ class NaiveCardCompleter : public QCompleter
     public:
         explicit NaiveCardCompleter(QObject *parent = nullptr);
         void loadCards();
+        void processQuery(const QString);
 };
 
 void BenchmarkCardCompletion();

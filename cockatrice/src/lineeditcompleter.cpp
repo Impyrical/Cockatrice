@@ -124,7 +124,7 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
         if (queryLen >= 3) {
             // Get the actual query
             QString query = beforeCursor.right(queryLen);
-            QStringList queryResults = cardCompleter->processQuery(&query);
+            cardCompleter->processQuery(query);
             QRect cr = cursorRect();
             cr.setWidth(cardCompleter->popup()->sizeHintForColumn(0) +
                     cardCompleter->popup()->verticalScrollBar()->sizeHint().width());

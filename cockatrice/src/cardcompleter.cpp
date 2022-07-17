@@ -2,6 +2,8 @@
 #include "cardcompleter.h"
 #include "carddatabase.h"
 
+#include <bits/chrono.h>
+#include <chrono>
 #include <cstdio>
 #include <iostream>
 #include <fstream>
@@ -45,11 +47,11 @@ void CardNameCompleter::indexName(const QString *cardName, int index) {
     }
 }
 
-QStringList CardNameCompleter::processQuery(const QString *query)
+void CardNameCompleter::processQuery(const QString query)
 {
     QStringList trigrams;
-    for (int i = 0; i < query->size(); i++) {
-        trigrams.append(query->mid(i, 3));
+    for (int i = 0; i < query.size(); i++) {
+        trigrams.append(query.mid(i, 3));
     }
     QStringList result;
     QSet<int> candidates;
@@ -57,14 +59,13 @@ QStringList CardNameCompleter::processQuery(const QString *query)
         foreach (int nameIndex, lookupIndex.values(trigram.toLower())) {
             if (!candidates.contains(nameIndex)) {
                 QString doc = cardNameList[nameIndex];
-                if (doc.contains(*query, Qt::CaseInsensitive))
+                if (doc.contains(query, Qt::CaseInsensitive))
                     result.append(doc);
                 candidates.insert(nameIndex);
             }
         }
     }
     trigramModel->setStringList(result);
-    return result;
 }
 
 NaiveCardCompleter::NaiveCardCompleter(QObject *parent) : QCompleter(parent)
@@ -85,7 +86,14 @@ void NaiveCardCompleter::loadCards()
     qDebug() << "NaiveCardCompleter::loadCards Loaded and indexed " << cardNameList.size() << "cards in" << QString("%1ms").arg(msecs);
 }
 
+void NaiveCardCompleter::processQuery(const QString query)
+{
+    setCompletionPrefix(query);
+    completionModel();
+}
+
 void BenchmarkCardCompletion() {
+    using namespace std::chrono;
     qDebug() << "BENCHMARK::Running simple benchmark to compare performance of trigram completion with other";
 
     // First load the cards
@@ -101,13 +109,16 @@ void BenchmarkCardCompletion() {
     // // Note we start at 3 since we are using trigrams
     for (int i = 3; i < simpleQuery.length(); i++) {
         QString subquery = simpleQuery.first(i);
-        // First query the trigram completer
-        auto trigramStart = QTime::currentTime();
-        int trigramTime = trigramStart.msecsTo(QTime::currentTime());
-        auto simpleStart = QTime::currentTime();
-        int simpleTime = simpleStart.msecsTo(QTime::currentTime());
-        resultFile << QString("%1,%2,%3").arg(QString::number(i),QString::number(simpleTime),QString::number(trigramTime)).toStdString();
-        resultFile << "\n";
+        auto trigramStart = high_resolution_clock::now();
+        trigramCompleter->processQuery(subquery);
+        auto trigramEnd = high_resolution_clock::now();
+        auto trigramTime = duration_cast<microseconds>(trigramEnd - trigramStart).count();
+
+        auto simpleStart = high_resolution_clock::now();
+        simpleCompleter->processQuery(subquery);
+        auto simpleEnd = high_resolution_clock::now();
+        auto simpleTime = duration_cast<microseconds>(simpleEnd - simpleStart).count();
+        resultFile << i << "," << simpleTime << "," << trigramTime << "\n";
     }
     resultFile.close();
 }
