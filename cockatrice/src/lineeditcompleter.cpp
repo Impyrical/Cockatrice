@@ -12,6 +12,8 @@
 #include <QTextCursor>
 #include <QWidget>
 #include <QApplication>
+#include <qcompleter.h>
+#include <qnamespace.h>
 
 
 LineEditCompleter::LineEditCompleter(QWidget *parent) : LineEditUnfocusable(parent), c(nullptr)
@@ -21,7 +23,7 @@ LineEditCompleter::LineEditCompleter(QWidget *parent) : LineEditUnfocusable(pare
     cardCompleter = new CardNameCompleter(this);
     cardCompleter->setCaseSensitivity(Qt::CaseInsensitive);
     cardCompleter->setMaxVisibleItems(10);
-    cardCompleter->setFilterMode(Qt::MatchStartsWith);
+    cardCompleter->setFilterMode(Qt::MatchContains);
     cardCompleter->setWidget(this);
     cardCompleter->popup()->setTabKeyNavigation(false);
 
@@ -124,7 +126,8 @@ void LineEditCompleter::keyPressEvent(QKeyEvent *event)
         if (queryLen >= 3) {
             // Get the actual query
             QString query = beforeCursor.right(queryLen);
-            cardCompleter->processQuery(query);
+            cardCompleter->setCompletionPrefix(query);
+            // cardCompleter->processQuery(query.toLower());
             QRect cr = cursorRect();
             cr.setWidth(cardCompleter->popup()->sizeHintForColumn(0) +
                     cardCompleter->popup()->verticalScrollBar()->sizeHint().width());

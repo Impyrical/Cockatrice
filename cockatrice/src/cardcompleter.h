@@ -7,7 +7,7 @@
 #include <QCompleter>
 #include <qtmetamacros.h>
 
-typedef QMultiHash<QString, int> TrigramIndex;
+typedef QHash<QString, QSet<int>> TrigramIndex;
 
 class CardNameCompleter : public QCompleter
 {

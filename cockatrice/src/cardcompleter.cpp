@@ -45,27 +45,32 @@ void CardNameCompleter::indexName(const QString *cardName, int index) {
         trigrams.append(cardName->mid(i, 3).toLower());
     }
     foreach(QString trigram, trigrams) {
-        lookupIndex.insert(trigram, index);
+        if (lookupIndex.contains(trigram)) {
+            lookupIndex[trigram].insert(index);
+        } else {
+            lookupIndex[trigram] = QSet<int>{index};
+        }
     }
 }
 
 void CardNameCompleter::processQuery(const QString query)
 {
     QStringList trigrams;
-    for (int i = 0; i <= query.size(); i++) {
+    for (int i = 0; i <= query.size()-3; i++) {
         trigrams.append(query.mid(i, 3));
     }
-    QStringList result;
     QSet<int> candidates;
     foreach(QString trigram, trigrams) {
-        foreach (int nameIndex, lookupIndex.values(trigram.toLower())) {
-            if (!candidates.contains(nameIndex)) {
-                QString doc = cardNameList[nameIndex];
-                if (doc.contains(query, Qt::CaseInsensitive))
-                    result.append(doc);
-                candidates.insert(nameIndex);
-            }
+        qDebug() << "Checking index for trigram" << trigram;
+        if (candidates.size() == 0) {
+            candidates = lookupIndex[trigram];
+        } else {
+            candidates = candidates.intersect(lookupIndex[trigram]);
         }
+    }
+    QStringList result;
+    foreach (int index, candidates) {
+        result.append(cardNameList[index]);
     }
     trigramModel->setStringList(result);
 }
@@ -95,7 +100,7 @@ void BenchmarkCardCompletion() {
         QString subquery = simpleQuery.first(i);
         auto trigramStart = high_resolution_clock::now();
         int trifound = trigramCompleter->completionModel()->rowCount();
-        trigramCompleter->processQuery(subquery);
+        trigramCompleter->processQuery(subquery.toLower());
         auto trigramEnd = high_resolution_clock::now();
         auto trigramTime = duration_cast<microseconds>(trigramEnd - trigramStart).count();
 
