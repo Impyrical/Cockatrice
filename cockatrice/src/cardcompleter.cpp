@@ -17,62 +17,12 @@
 #include <qcompleter.h>
 #include <qnamespace.h>
 
-CardNameCompleter::CardNameCompleter(QObject *parent) : QCompleter(parent)
+CardNameCompleter::CardNameCompleter(QObject *parent) : QCompleter(db->getCardNameList(), parent)
 {
-    loadCards();
-}
-
-void CardNameCompleter::loadCards()
-{
-    qDebug() << "CardCompleter::loadCards Loading cards for the card name completer";
-
-    auto startTime = QTime::currentTime();
-    int count = 0;
-    foreach (QString cardName, db->getCardNameList()) {
-        cardNameList.append(cardName);
-        indexName(&cardName, count);
-        count++;
-    }
-    int msecs = startTime.msecsTo(QTime::currentTime());
-    qDebug() << "CardCompleter::loadCards Loaded and indexed " << cardNameList.size() << "cards in" << QString("%1ms").arg(msecs);
-    trigramModel = new QStringListModel(cardNameList, this);
-    setModel(trigramModel);
-}
-
-void CardNameCompleter::indexName(const QString *cardName, int index) {
-    QStringList trigrams;
-    for (int i = 0; i < cardName->size()-3; i++) {
-        trigrams.append(cardName->mid(i, 3).toLower());
-    }
-    foreach(QString trigram, trigrams) {
-        if (lookupIndex.contains(trigram)) {
-            lookupIndex[trigram].insert(index);
-        } else {
-            lookupIndex[trigram] = QSet<int>{index};
-        }
-    }
 }
 
 void CardNameCompleter::processQuery(const QString query)
 {
-    QStringList trigrams;
-    for (int i = 0; i <= query.size()-3; i++) {
-        trigrams.append(query.mid(i, 3));
-    }
-    QSet<int> candidates;
-    foreach(QString trigram, trigrams) {
-        qDebug() << "Checking index for trigram" << trigram;
-        if (candidates.size() == 0) {
-            candidates = lookupIndex[trigram];
-        } else {
-            candidates = candidates.intersect(lookupIndex[trigram]);
-        }
-    }
-    QStringList result;
-    foreach (int index, candidates) {
-        result.append(cardNameList[index]);
-    }
-    trigramModel->setStringList(result);
 }
 
 
