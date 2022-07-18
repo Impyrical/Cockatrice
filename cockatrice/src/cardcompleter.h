@@ -26,17 +26,6 @@ class CardNameCompleter : public QCompleter
         void processQuery(const QString);
 };
 
-class NaiveCardCompleter : public QCompleter
-{
-    Q_OBJECT
-    protected:
-        QStringList cardNameList;
-    public:
-        explicit NaiveCardCompleter(QObject *parent = nullptr);
-        void loadCards();
-        void processQuery(const QString);
-};
-
 void BenchmarkCardCompletion();
 
 #endif

@@ -14,6 +14,8 @@
 #include <QString>
 #include <QSet>
 #include <QHash>
+#include <qcompleter.h>
+#include <qnamespace.h>
 
 CardNameCompleter::CardNameCompleter(QObject *parent) : QCompleter(parent)
 {
@@ -50,7 +52,7 @@ void CardNameCompleter::indexName(const QString *cardName, int index) {
 void CardNameCompleter::processQuery(const QString query)
 {
     QStringList trigrams;
-    for (int i = 0; i < query.size(); i++) {
+    for (int i = 0; i <= query.size(); i++) {
         trigrams.append(query.mid(i, 3));
     }
     QStringList result;
@@ -68,29 +70,6 @@ void CardNameCompleter::processQuery(const QString query)
     trigramModel->setStringList(result);
 }
 
-NaiveCardCompleter::NaiveCardCompleter(QObject *parent) : QCompleter(parent)
-{
-    loadCards();
-}
-
-void NaiveCardCompleter::loadCards()
-{
-    qDebug() << "Naive card completer loading cards";
-    auto startTime = QTime::currentTime();
-    int count = 0;
-    foreach (QString cardName, db->getCardNameList()) {
-        cardNameList.append(cardName);
-        count++;
-    }
-    int msecs = startTime.msecsTo(QTime::currentTime());
-    qDebug() << "NaiveCardCompleter::loadCards Loaded and indexed " << cardNameList.size() << "cards in" << QString("%1ms").arg(msecs);
-}
-
-void NaiveCardCompleter::processQuery(const QString query)
-{
-    setCompletionPrefix(query);
-    completionModel();
-}
 
 void BenchmarkCardCompletion() {
     using namespace std::chrono;
@@ -98,7 +77,12 @@ void BenchmarkCardCompletion() {
 
     // First load the cards
     CardNameCompleter *trigramCompleter = new CardNameCompleter();
-    NaiveCardCompleter *simpleCompleter = new NaiveCardCompleter();
+
+    auto startTime = QTime::currentTime();
+    QCompleter *simpleCompleter = new QCompleter(db->getCardNameList());
+    int msecs = startTime.msecsTo(QTime::currentTime());
+    qDebug() << "QCompleter::loadCards Loaded and indexed in" << QString("%1ms").arg(msecs);
+    simpleCompleter->setFilterMode(Qt::MatchContains);
 
     QString simpleQuery = "Testament of Faith";
 
@@ -107,17 +91,21 @@ void BenchmarkCardCompletion() {
     resultFile.open("complete_bench.csv", std::ofstream::out | std::ofstream::trunc);
     resultFile << "querylen,simple,trigram\n";
     // // Note we start at 3 since we are using trigrams
-    for (int i = 3; i < simpleQuery.length(); i++) {
+    for (int i = 3; i <= simpleQuery.length(); i++) {
         QString subquery = simpleQuery.first(i);
         auto trigramStart = high_resolution_clock::now();
+        int trifound = trigramCompleter->completionModel()->rowCount();
         trigramCompleter->processQuery(subquery);
         auto trigramEnd = high_resolution_clock::now();
         auto trigramTime = duration_cast<microseconds>(trigramEnd - trigramStart).count();
 
         auto simpleStart = high_resolution_clock::now();
-        simpleCompleter->processQuery(subquery);
+        simpleCompleter->setCompletionPrefix(subquery);
+        int simpfound = simpleCompleter->completionModel()->rowCount();
+        qDebug() << "When querying for" << subquery << ", simple found" << simpfound << simpleCompleter->filterMode() << "and trigram found" << trifound << "results";
         auto simpleEnd = high_resolution_clock::now();
         auto simpleTime = duration_cast<microseconds>(simpleEnd - simpleStart).count();
+
         resultFile << i << "," << simpleTime << "," << trigramTime << "\n";
     }
     resultFile.close();
