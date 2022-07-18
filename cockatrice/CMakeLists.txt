@@ -29,7 +29,6 @@ set(cockatrice_SOURCES
     src/chatview/chatview.cpp
     src/counter_general.cpp
     src/customlineedit.cpp
-    src/cardcompleter.cpp
     src/deck_loader.cpp
     src/decklistmodel.cpp
     src/deckstats_interface.cpp

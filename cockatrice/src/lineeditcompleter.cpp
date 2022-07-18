@@ -1,5 +1,6 @@
 #include "lineeditcompleter.h"
-#include "cardcompleter.h"
+#include "main.h"
+#include "carddatabase.h"
 
 #include <QObject>
 #include <QAbstractItemView>
@@ -18,9 +19,7 @@
 
 LineEditCompleter::LineEditCompleter(QWidget *parent) : LineEditUnfocusable(parent), c(nullptr)
 {
-    BenchmarkCardCompletion();
-
-    cardCompleter = new CardNameCompleter(this);
+    cardCompleter = new QCompleter(db->getCardNameList(), this);
     cardCompleter->setCaseSensitivity(Qt::CaseInsensitive);
     cardCompleter->setMaxVisibleItems(10);
     cardCompleter->setFilterMode(Qt::MatchContains);
